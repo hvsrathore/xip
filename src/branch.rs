@@ -28,7 +28,6 @@ pub fn create (branch_name: &String) {
 pub fn switch (branch_name: &String) {
     /* checkout a branch */ 
     checkout::checkout(&branch_name);
-    /* update HEAD to point to the new branch */
     println!("switched to '{}', do your thing", branch_name);
 }
 

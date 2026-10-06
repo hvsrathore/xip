@@ -64,7 +64,7 @@ fn main() {
         },
         Commands::Commit { message } => { 
             /* warn user if modified, untracked and deleted files exist */
-            let status = Status::get_status(&index);
+            let status = Status::get_dir_status(".", &index);
             if status.untracked.len() > 0 ||  status.modified.len() > 0 ||  status.deleted.len() > 0 {
                 Status::print_status(&status);
                 println!("unstaged changes, run 'xip add' to index");
@@ -75,7 +75,7 @@ fn main() {
         Commands::Checkout { target } => { checkout::checkout(&target); }, 
         Commands::Status { dir_name } => { 
             if let Some(dname) = dir_name {
-                Status::print_status(&Status::get_dir_status(dname.clone(), &index)); 
+                Status::print_status(&Status::get_dir_status(&dname.clone(), &index)); 
             } else {
                 Status::print_status(&Status::get_dir_status(".", &index)); 
             }
