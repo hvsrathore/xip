@@ -1,0 +1,17 @@
+[package]
+name = "xip"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+flate2 = "1.1.10"
+hex = "0.4.3"
+io-uring = "0.7.15"
+memmap2 = "0.9.11"
+rayon = "1.12.0"
+sha1 = "0.11.0"
+
+[[bin]]
+name = "xip"
+path = "src/main.rs"
