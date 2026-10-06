@@ -18,7 +18,7 @@ pub struct Status {
 }
 
 impl Status {
-    pub fn get_status (index: &Index) -> Status {
+    pub fn get_dir_status (dir_name: &str, index: &Index) -> Status {
         let mut modified = Vec::new();
         let mut deleted = Vec::new();
         /* using a HashMap to do fast lookups */

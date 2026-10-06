@@ -41,7 +41,7 @@ enum Commands {
     Init,
     Add { path: String }, 
     Commit {message: String }, 
-    Status, 
+    Status { dir_name: Option<String> },
     Checkout {target: String}, 
     Ls,
     Branch { branch_name: Option<String> },
@@ -73,7 +73,13 @@ fn main() {
             }
         },
         Commands::Checkout { target } => { checkout::checkout(&target); }, 
-        Commands::Status => { Status::print_status(&Status::get_status(&index)); },
+        Commands::Status { dir_name } => { 
+            if let Some(dname) = dir_name {
+                Status::print_status(&Status::get_dir_status(dname.clone(), &index)); 
+            } else {
+                Status::print_status(&Status::get_dir_status(".", &index)); 
+            }
+        },
         Commands::Branch { branch_name } => { 
             if let Some(name) = branch_name {
                 branch::create(&name);
