@@ -104,15 +104,17 @@ fn add_single_file (file_path: String, index: &mut Index) {
         return;
     }
 }
-pub fn add_to_index (file_path: String, index: &mut Index) {
-    /* check if user gave a directory name or a file name */
-    let meta = fs::symlink_metadata(&file_path).expect("Error reading metadata");
-    if meta.is_dir() {
-        /* traverse the whole directory */
-        add_dir(&file_path, index);
-    } else {
-        /* index only a single file */
-        add_single_file(file_path.clone(), index);
+pub fn add_to_index (file_paths: Vec<String>, index: &mut Index) {
+    /* multiple files or a wildcard */
+    for file in file_paths {
+        /* if one of the paths is a directory */
+        let meta = fs::symlink_metadata(&file).expect("Error reading metadata");
+        if meta.is_dir() {
+            /* traverse the whole directory */
+            add_dir(&file, index);
+        } else {
+            add_single_file(file.clone(), index);
+        }
     }
     /* update index to disk */
     let index_path = format!("{}/.xip/index", env::current_dir().unwrap().display());

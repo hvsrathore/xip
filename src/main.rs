@@ -39,7 +39,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Init,
-    Add { path: String }, 
+    Add { path: Vec<String> }, 
     Commit {message: String }, 
     Status { dir_name: Option<String> },
     Checkout {target: String}, 
