@@ -146,7 +146,8 @@ pub fn checkout (target: &str) {
             /* restore working directory based on that commit */
             build_working_dir(&commit_hash);
             /* update HEAD pointing to the new branch inside refs */
-            /* HEAD is updated in branch::switch(): the calling function*/
+            let head_path = format!("{}/.xip/HEAD", cwd.display());
+            fs::write(head_path, format!("ref: refs/heads/{}", &target)).unwrap();
         }, 
         /* if target is a raw commit hash */
         Ok(false) => {

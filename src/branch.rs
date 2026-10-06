@@ -29,9 +29,6 @@ pub fn switch (branch_name: &String) {
     /* checkout a branch */ 
     checkout::checkout(&branch_name);
     /* update HEAD to point to the new branch */
-    let cwd = env::current_dir().unwrap();
-    let head_path = format!("{}/.xip/HEAD", cwd.display());
-    fs::write(head_path, format!("ref: refs/heads/{}", branch_name)).unwrap();
     println!("switched to '{}', do your thing", branch_name);
 }
 
