@@ -9,7 +9,7 @@ Key core capabilities, basic workflows, and performance optimizations are alread
    * Successfully initializes the `.xip/` structure, including `objects/`, `refs/heads/`, and a `HEAD` file referencing 'main'.  
 2. **Index File Management (`index.rs`, `index_header.rs`, `index_entry.rs`)**
 
-   * Binary parsing and serialization of Git index headers (DIRC, version 2\) and file entries.  
+   * Binary parsing and serialization of Xip index headers (DIRC, version 2\) and file entries.  
    * Calculates padding bytes to maintain strict Git 8-byte alignment.  
    * Uses memory-mapped files (`memmap2`) for efficient index reads.  
 3. **Staging Area (`stage.rs`, `object.rs`)**
