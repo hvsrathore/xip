@@ -115,14 +115,16 @@ fn build_working_dir (commit_hash: &str) {
     let commit = read_object(commit_hash);
     let tree = read_object(&commit[5..45]);
     let cwd = env::current_dir().unwrap();
-    /* create a list of blobs to write back to disk */
-    let mut blob_files_to_write: Vec<(String, String)> = Vec::new();
-    create_dirs(&tree, &cwd.display().to_string(), &mut blob_files_to_write);
-    /* for lookups */
     let mut index = Index::fetch_index();
+    /* create a list of blobs to write back to disk... */
+    let mut blob_files_to_write: Vec<(String, String)> = Vec::new();
+    /* ...by traversing the tree */
+    create_dirs(&tree, &cwd.display().to_string(), &mut blob_files_to_write);
+    /* for fast lookups */
     let mut index_map = HashMap::new();
     for entry in &mut index.entries {
         index_map.insert(entry.path.clone(), entry);
+        let _ = fs::remove_file(&entry.path);
     }
     filter_blobs(&mut blob_files_to_write, &mut index_map);
     /* write the filtered blobs to disk */
