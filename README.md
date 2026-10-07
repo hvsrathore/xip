@@ -27,15 +27,6 @@ Key core capabilities, basic workflows, and performance optimizations are alread
 
 ---
 
-## Known Logical Bugs 
-
-There are a few dangerous logical traps hiding in the state transitions. Here are the four most critical logical bugs currently identified:
-
-1. **The "Ghost Files" (`checkout.rs`)** 
-   When checking out a previous commit, the code successfully writes the files that belong to that older commit. But what happens to brand new files the user created after that commit? The `checkout` logic never deletes them. They will remain in the working directory as untracked "ghost" files, mixing two different timelines together.   
-
----
-
 ## Areas Needing Attention or Completion
 
 1. **Unimplemented Log Module (`log.rs`)**
