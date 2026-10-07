@@ -68,9 +68,8 @@ fn main() {
             if status.untracked.len() > 0 ||  status.modified.len() > 0 ||  status.deleted.len() > 0 {
                 Status::print_status(&status);
                 println!("unstaged changes, run 'xip add' to index");
-            } else {
-                commit::build_commit(&index, &message); 
             }
+            commit::build_commit(&index, &message); 
         },
         Commands::Checkout { target } => { checkout::checkout(&target); }, 
         Commands::Status { dir_name } => { 

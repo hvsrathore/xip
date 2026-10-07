@@ -18,7 +18,7 @@ pub fn create (branch_name: &String) {
         println!("'{}' exists, nothing to do", branch_name);
         return;
     }
-    /* check previous branch exists and contains a commit */
+    /* check if previous branch exists and contains a commit */
     if let Ok(current_branch_commit_hash) = fs::read_to_string(&current_branch_ref_full_path) {
         fs::write(branch_file_path, current_branch_commit_hash).unwrap();
         println!("'{}' created", branch_name);
