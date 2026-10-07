@@ -35,10 +35,6 @@ There are a few dangerous logical traps hiding in the state transitions. Here ar
    When `build_working_dir` is called, it maps out the new tree and directly calls `fs::write` to place the blobs on disk. However, there is no check to see if the user has uncommitted, unsaved work in their current directory. If they do, `checkout` will silently overwrite their hard work with the older committed versions.   
 2. **The "Ghost Files" (`checkout.rs`)** 
    When checking out a previous commit, the code successfully writes the files that belong to that older commit. But what happens to brand new files the user created after that commit? The `checkout` logic never deletes them. They will remain in the working directory as untracked "ghost" files, mixing two different timelines together.   
-3. **The "Premature Branch" Panic (`branch.rs`)** 
-   In `branch::create`, the code reads `.xip/HEAD` to find the current branch, and then immediately tries to read the commit hash from that branch's ref file to copy it. But if a user initializes a brand new repo and types `xip branch feature` before making their very first commit, that branch ref file won't exist yet. The `.unwrap()` will cause a fatal panic.   
-4. **The "All-or-Nothing" Commit Blocker (`main.rs`)** 
-   In the CLI routing for `Commit`, the code checks if `status.untracked`, `status.modified`, or `status.deleted` have any files. If they do, it blocks the commit entirely and tells the user to run `add`. But Git allows you to stage just one file and commit it, even if you have 10 other unstaged files. The current logic forces the working directory to be 100% clean before it allows a commit.   
 
 ---
 
