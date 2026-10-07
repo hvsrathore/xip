@@ -90,6 +90,7 @@ pub fn build_commit (index: &Index, message: &String) {
     let state = get_state();
     let mut parent_hash = String::new();
     /* check the state (detached or branched) */
+    /* TODO: string comparison is slow, use bit flags instead */
     match state.as_str() {
         "detached" => {
             /* if detached state: get parent hash from .xip/HEAD */

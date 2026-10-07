@@ -110,9 +110,9 @@ fn filter_blobs(blobs_to_write: &mut Vec<(String, String)>, index_map: &mut Hash
     });
 }
 
-fn build_working_dir (head: &str) {
+fn build_working_dir (commit_hash: &str) {
     /* init objects */
-    let commit = read_object(head);
+    let commit = read_object(commit_hash);
     let tree = read_object(&commit[5..45]);
     let cwd = env::current_dir().unwrap();
     /* create a list of blobs to write back to disk */
@@ -139,7 +139,7 @@ pub fn checkout (target: &str) {
     let ref_path = format!("{}/.xip/refs/heads/{}", cwd.display(), target);
     /* figure out whether target is a commit hash or branch name */
     match fs::exists(&ref_path) {
-        /* if 'target' is inside '.xip/refs/heads/' */
+        /* 'target' is inside '.xip/refs/heads/' */
         Ok(true) => {
             /* read the commit hash inside it and move on */
             let commit_hash = fs::read_to_string(&ref_path).unwrap();
@@ -149,7 +149,7 @@ pub fn checkout (target: &str) {
             let head_path = format!("{}/.xip/HEAD", cwd.display());
             fs::write(head_path, format!("ref: refs/heads/{}", &target)).unwrap();
         }, 
-        /* if target is a raw commit hash */
+        /* target is a raw commit hash: make detached HEAD */
         Ok(false) => {
             /* restore working directory based on that commit */
             build_working_dir(target);

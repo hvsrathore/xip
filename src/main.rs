@@ -71,7 +71,17 @@ fn main() {
             }
             commit::build_commit(&index, &message); 
         },
-        Commands::Checkout { target } => { checkout::checkout(&target); }, 
+        Commands::Checkout { target } => { 
+            /* warn user if modified and untracked files exist */
+            let status = Status::get_dir_status(".", &index);
+            if status.untracked.len() > 0 ||  status.modified.len() > 0 ||  status.deleted.len() > 0 {
+                Status::print_status(&status);
+                println!("unstaged changes, index and commit");
+                return;
+            } else {
+                checkout::checkout(&target); 
+            }
+        }, 
         Commands::Status { dir_name } => { 
             if let Some(dname) = dir_name {
                 Status::print_status(&Status::get_dir_status(&dname.clone(), &index)); 

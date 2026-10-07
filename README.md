@@ -31,9 +31,7 @@ Key core capabilities, basic workflows, and performance optimizations are alread
 
 There are a few dangerous logical traps hiding in the state transitions. Here are the four most critical logical bugs currently identified:
 
-1. **The "Unsaved Work Destroyer" (`checkout.rs`)** 
-   When `build_working_dir` is called, it maps out the new tree and directly calls `fs::write` to place the blobs on disk. However, there is no check to see if the user has uncommitted, unsaved work in their current directory. If they do, `checkout` will silently overwrite their hard work with the older committed versions.   
-2. **The "Ghost Files" (`checkout.rs`)** 
+1. **The "Ghost Files" (`checkout.rs`)** 
    When checking out a previous commit, the code successfully writes the files that belong to that older commit. But what happens to brand new files the user created after that commit? The `checkout` logic never deletes them. They will remain in the working directory as untracked "ghost" files, mixing two different timelines together.   
 
 ---
