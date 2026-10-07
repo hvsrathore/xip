@@ -9,11 +9,8 @@ pub fn create (branch_name: &String) {
     let current_branch_ref = fs::read_to_string(&head_path).unwrap();
     /* extract the relative path to the current branch's file (e.g., "refs/heads/main") */
     let (_, current_branch_ref_path) = current_branch_ref.split_once(':').unwrap();
-    println!("{}", current_branch_ref_path.trim());
     /* read the latest commit hash from that current branch */
     let current_branch_ref_full_path = format!("{}/.xip/{}", cwd.display(), current_branch_ref_path.trim());
-    println!("{}", current_branch_ref_full_path);
-    let current_branch_commit_hash = fs::read_to_string(&current_branch_ref_full_path).unwrap();
     /* create the new branch file and initialize it with that same commit hash */
     let branch_file_path = format!("{}/.xip/refs/heads/{}", cwd.display(), branch_name);
     /* what if branch already exists? */
@@ -21,8 +18,13 @@ pub fn create (branch_name: &String) {
         println!("'{}' exists, nothing to do", branch_name);
         return;
     }
-    fs::write(branch_file_path, current_branch_commit_hash).unwrap();
-    println!("'{}' created", branch_name);
+    /* check previous branch exists and contains a commit */
+    if let Ok(current_branch_commit_hash) = fs::read_to_string(&current_branch_ref_full_path) {
+        fs::write(branch_file_path, current_branch_commit_hash).unwrap();
+        println!("'{}' created", branch_name);
+    } else {
+        println!("new repo, no prior commits");
+    }
 }
 
 pub fn switch (branch_name: &String) {
