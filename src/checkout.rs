@@ -124,6 +124,7 @@ fn build_working_dir (commit_hash: &str) {
     let mut index_map = HashMap::new();
     for entry in &mut index.entries {
         index_map.insert(entry.path.clone(), entry);
+        /* clean working directory */
         let _ = fs::remove_file(&entry.path);
     }
     filter_blobs(&mut blob_files_to_write, &mut index_map);

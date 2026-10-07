@@ -95,5 +95,3 @@ impl Status {
         false
     }
 }
-
-
