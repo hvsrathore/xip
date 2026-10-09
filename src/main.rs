@@ -99,7 +99,7 @@ fn main() {
             }
         }, 
         Commands::Switch { branch_name } => { branch::switch(&branch_name); },
-        Commands::Merge { branch_name } => { merge::merge(&branch_name); }
+        Commands::Merge { branch_name } => { merge::ort_merge(&branch_name); }
         // Commands::Log => { println!("{}", log::Log::get_log()); }
     }
 }
