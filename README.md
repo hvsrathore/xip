@@ -1,4 +1,4 @@
-# xip: Rust Implementation of a Git-like Version Control System
+# xip: impoverished git in Rust
 
 Key core capabilities, basic workflows, and performance optimizations are already functioning, though several areas remain incomplete or in draft form.
 
