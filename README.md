@@ -27,14 +27,6 @@ Key core capabilities, basic workflows, and performance optimizations are alread
 
 ---
 
-## Areas Needing Attention or Completion
-
-1. **Error Handling & Edge Cases**
-   * Heavy reliance on `.unwrap()` and `.expect()` throughout filesystem operations, which can cause unhandled panics if `.xip` files are corrupt or missing.
-   * Hardcoded user and email (HVSR hvsr@gmail.com) during commit creation rather than pulling from a configuration file.
-
----
-
 ## Next Steps & Suggestions
 
 1. **Implement merge: the ORT strategy**
@@ -43,3 +35,11 @@ Key core capabilities, basic workflows, and performance optimizations are alread
    * Complete the parser in `log.rs` to walk back parent commit hashes starting from `HEAD`.
 3. **Configuration Support**
    * Add a `.xip/config` or system environment reader to dynamically get the author name and email.
+
+---
+
+## Areas Needing Attention or Completion
+
+1. **Error Handling & Edge Cases**
+   * Heavy reliance on `.unwrap()` and `.expect()` throughout filesystem operations, which can cause unhandled panics if `.xip` files are corrupt or missing.
+   * Hardcoded user and email (HVSR hvsr@gmail.com) during commit creation rather than pulling from a configuration file.
