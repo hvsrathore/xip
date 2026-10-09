@@ -43,5 +43,3 @@ Key core capabilities, basic workflows, and performance optimizations are alread
    * Complete the parser in `log.rs` to walk back parent commit hashes starting from `HEAD`.
 3. **Configuration Support**
    * Add a `.xip/config` or system environment reader to dynamically get the author name and email.
-4. **Refactor Errors**
-   * Swap out critical `.unwrap()` calls for proper `Result<T, E>` error propagation to avoid crashes on bad states.
