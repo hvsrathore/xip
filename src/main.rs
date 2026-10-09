@@ -47,7 +47,7 @@ enum Commands {
     Ls,
     Branch { branch_name: Option<String> },
     Switch { branch_name: String },
-    Merge { branch_name:String }
+    Merge { branch_name: String }
     // Log
 }
 
