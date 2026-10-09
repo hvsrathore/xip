@@ -20,7 +20,6 @@ use crate::IndexEntry;
 pub fn read_object (hash: &str) -> String {
     let cwd = env::current_dir().unwrap();
     let path = format!("{}/.xip/objects/{}", cwd.display(), &hash[0..]);
-    // println!("path: {:?}", path);
     let compressed = fs::read(&path).unwrap();
     let mut decoder = ZlibDecoder::new(&compressed[..]);
     let mut decompressed = String::new();
@@ -123,9 +122,9 @@ fn build_working_dir (commit_hash: &str) {
     /* for fast lookups */
     let mut index_map = HashMap::new();
     for entry in &mut index.entries {
+        let _ = fs::remove_file(&entry.path);
         index_map.insert(entry.path.clone(), entry);
         /* clean working directory */
-        let _ = fs::remove_file(&entry.path);
     }
     filter_blobs(&mut blob_files_to_write, &mut index_map);
     /* write the filtered blobs to disk */

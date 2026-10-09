@@ -107,12 +107,13 @@ pub fn build_commit (index: &Index, message: &String) {
     let timestamp = since_the_epoch.as_secs();
     let mut commit_content = String::new();
     if parent_hash.len() > 0 {
+        /* TODO: replace hardcoded values */
+        /* TODO: what if a commit hash more than one parent, i.e., a merge commit */
         commit_content = format!("tree {}\nparent {}\nauthor HVSR hvsr@gmail.com {} +0000\ncommitter HVSR hvsr@gmail.com {} +0000\n\n{}",
             root_hash, parent_hash, timestamp, timestamp, message);
     } else {
         commit_content = format!("tree {}\nauthor HVSR hvsr@gmail.com {} +0000\ncommitter HVSR hvsr@gmail.com {} +0000\n\n{}",
             root_hash, timestamp, timestamp, message);
-
     }
     let commit_hash_str = hash_commit(&commit_content);
     let compressed = compress_commit(&commit_content);
