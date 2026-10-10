@@ -13,7 +13,6 @@ mod status;
 mod utils;
 mod branch;
 mod init;
-mod merge;
 // mod log;
 use crate::index::Index;
 use crate::index_entry::IndexEntry;
@@ -47,7 +46,6 @@ enum Commands {
     Ls,
     Branch { branch_name: Option<String> },
     Switch { branch_name: String },
-    Merge { branch_name: String }
     // Log
 }
 
@@ -98,8 +96,7 @@ fn main() {
                 branch::ls();
             }
         }, 
-        Commands::Switch { branch_name } => { branch::switch(&branch_name); },
-        Commands::Merge { branch_name } => { merge::ort_merge(&branch_name); }
+        Commands::Switch { branch_name } => { branch::switch(&branch_name); }
         // Commands::Log => { println!("{}", log::Log::get_log()); }
     }
 }
