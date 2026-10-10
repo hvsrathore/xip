@@ -2,6 +2,8 @@
 
 Key core capabilities, basic workflows, and performance optimizations are already functioning, though several areas remain incomplete or in draft form.
 
+---
+
 ## Core Progress & Highlights
 
 1. **Repository Initialization (`init.rs`)**
