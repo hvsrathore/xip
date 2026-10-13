@@ -10,8 +10,23 @@ struct {
 /*  find the common ancestor by walking 'ours' parent hashes 
  *  into a HashSet for O(1) lookups, then walking 'theirs' 
  *  parents until we find a match */
-fn resolve_base (ours: &String, theirs: &String) {
-    
+fn resolve_base (ours: &String, theirs: &String) -> Option<String> {
+    let mut ancestors: HashSet<String> = HashSet::new();
+    /* walk backward from branch 'ours' */
+    let mut parent = Some(ours.to_string());
+    while let Some(parent_hash) = parent {
+        ancestors.insert(parent_hash.clone());
+        parent = commit::get_parent_from_commit(&parent_hash);
+    }
+    parent = Some(theirs.to_string());
+    while let Some(parent_hash) = parent {
+        if ancestors.contains(&parent_hash) {
+            return Some(parent_hash);
+        }
+        parent = commit::get_parent_from_commit(&parent_hash);
+    }
+    /* a fallback in case the loop finishes without a match */
+    None
 }
 
 pub fn ort_merge (theirs: &String) {
@@ -22,7 +37,7 @@ pub fn ort_merge (theirs: &String) {
     let ref_path = format!("{}/.xip/refs/heads/{}", cwd.display(), theirs);
     /* get current branch parent hash */
     let ours = commit::get_parent_from_ref(); 
-    let mut base = String::new();
+    let mut base = Option<String>::new();
     let mut their_commit_hash = String::new(); 
     /* figure out whether 'theirs' is a valid branch name */
     match fs::exists(&ref_path) {
