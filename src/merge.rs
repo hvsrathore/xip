@@ -43,8 +43,15 @@ pub fn ort_merge (theirs: &String) {
     match fs::exists(&ref_path) {
         /* 'theirs' is inside '.xip/refs/heads/' */
         Ok(true) => {
-            their_commit_hash = fs::read_to_string(&ref_path).unwrap().trim().to_string();
-            base = resolve_base(&ours, &their_commit_hash);
+            their_commit_hash = fs::read_to_string(&ref_path)
+                .unwrap().trim().to_string();
+            let base = match resolve_base(&ours, &their_commit_hash) {
+                Some(base_hash) => base_hash,
+                None => {
+                    println!("unrelated history, nothing to do");
+                    return;
+                }
+            };
         }, 
         Ok(false) => {
             println!("not a branch");
@@ -54,6 +61,7 @@ pub fn ort_merge (theirs: &String) {
             panic!("Error checking existence of branch");
         }
     }
+
     /* TODO: analyze both sides: 
      *      compare the base tree with each 
      *      branch's tree to identify additions, deletions, 
