@@ -2,10 +2,15 @@ use std::collections::{HashSet, HashMap};
 use std::env;
 use crate::commit;
 
-struct {
+/* Key: (base_tree_hash, our_tree_hash, their_tree_hash) */
+pub type TreeCacheKey = (String, String, String);
+/* final merge of a specific directory */
+pub struct CachedTreeMerge {
     merged_tree_hash: String, 
     has_conflict: bool
 }
+/*  the ORT cache itself */
+pub type OrtCache = HashMap<TreeCacheKey, CachedTreeMerge>;
 
 /*  find the common ancestor by walking 'ours' parent hashes 
  *  into a HashSet for O(1) lookups, then walking 'theirs' 
@@ -27,6 +32,17 @@ fn resolve_base (ours: &String, theirs: &String) -> Option<String> {
     }
     /* a fallback in case the loop finishes without a match */
     None
+}
+
+fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mut OrtCache) -> CachedTreeMerge {
+    /* tree skipping: absolutely nothing changed inside 
+     * this folder on either branch */
+    if (base_tree == our_tree) && (base_tree == their_tree) {
+       return CachedTreeMerge {
+           merged_tree_hash: base_tree.clone(), 
+           has_conflict: false
+       };
+    }
 }
 
 pub fn ort_merge (theirs: &String) {
@@ -67,6 +83,8 @@ pub fn ort_merge (theirs: &String) {
      *      branch's tree to identify additions, deletions, 
      *      renames, and modifications */
 
+    let our_tree = tree::get_root_hash(&ours);
+    let their_tree = tree::get_root_hash(&their_commit_hash);
 
     /* TODO: reconcile file structure: 
      *      handle renames, directory changes, 

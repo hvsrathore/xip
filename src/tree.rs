@@ -15,6 +15,11 @@ enum TreeEntry {
     Tree(HashMap<String, TreeEntry>)
 }
 
+/* TODO:*/
+pub fn get_root_hash (commit_hash: &str) {
+
+}
+
 /* parses the index, builds and returns a recursive HashMap */
 fn build_tree_hmap (index: &Index) -> TreeEntry {
     /* create the the root tree node */
