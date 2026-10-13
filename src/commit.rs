@@ -67,7 +67,7 @@ pub fn get_parent_from_ref () -> String {
     let (_, branch_ref_path) = head_content.split_once(':').unwrap();
     let ref_path = format!("{}/.xip/{}", cwd.display(), branch_ref_path.trim());
     /* read the latest commit hash from that current branch */
-    /* but what if it's the very first commit */
+    /* but return an empty string if it's the very first commit */
     match fs::read_to_string(&ref_path) {
         Ok(parent_hash) => { parent_hash.clone() },
         Err(_) => { String::new() }
