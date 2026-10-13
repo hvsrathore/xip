@@ -37,7 +37,7 @@ pub fn ort_merge (theirs: &String) {
     let ref_path = format!("{}/.xip/refs/heads/{}", cwd.display(), theirs);
     /* get current branch parent hash */
     let ours = commit::get_parent_from_ref(); 
-    let mut base = Option<String>::new();
+    let mut base = String::new();
     let mut their_commit_hash = String::new(); 
     /* figure out whether 'theirs' is a valid branch name */
     match fs::exists(&ref_path) {
@@ -45,7 +45,7 @@ pub fn ort_merge (theirs: &String) {
         Ok(true) => {
             their_commit_hash = fs::read_to_string(&ref_path)
                 .unwrap().trim().to_string();
-            let base = match resolve_base(&ours, &their_commit_hash) {
+            base = match resolve_base(&ours, &their_commit_hash) {
                 Some(base_hash) => base_hash,
                 None => {
                     println!("unrelated history, nothing to do");
