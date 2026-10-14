@@ -5,6 +5,7 @@ use crate::commit;
 /* Key: (base_tree_hash, our_tree_hash, their_tree_hash) */
 pub type TreeCacheKey = (String, String, String);
 /* final merge of a specific directory */
+#[derive(Debug, Clone)]
 pub struct CachedTreeMerge {
     merged_tree_hash: String, 
     has_conflict: bool
@@ -35,14 +36,35 @@ fn resolve_base (ours: &String, theirs: &String) -> Option<String> {
 }
 
 fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mut OrtCache) -> CachedTreeMerge {
-    /* tree skipping: absolutely nothing changed inside 
+    /* case 1: tree skipping; absolutely nothing changed inside 
      * this folder on either branch */
     if (base_tree == our_tree) && (base_tree == their_tree) {
        return CachedTreeMerge {
            merged_tree_hash: base_tree.clone(), 
            has_conflict: false
        };
+    } 
+    /* case 2: one of the branches modified this directory,
+     * but what if the merge is already performed? */
+    if let Some(cached) = cache.get(&(base_tree.clone(), our_tree.clone(), their_tree.clone())) {
+        return cached.clone(); 
     }
+
+    /* case 3: a brand new directory state, and we 
+     * actually have to compute the merge! */
+
+    let mut base_file_map: HashMap<String, String> = HashMap::new();
+    let mut our_file_map: HashMap<String, String> = HashMap::new();
+    let mut their_file_map: HashMap<String, String> = HashMap::new();
+    tree::read_tree(&base_tree, &mut base_file_map);
+    tree::read_tree(&our_tree, &mut our_file_map);
+    tree::read_tree(&their_tree, &mut their_file_map);
+    let mut file_set: HashSet<String> = HashSet::new();
+
+    /* evaluate what happened to each file one by one, to do this: 
+     * loop through our file_set: for each filename in that loop, 
+     * figure out if it was modified, 
+     * added, deleted, or left alone by each branch. */
 }
 
 pub fn ort_merge (theirs: &String) {
@@ -52,7 +74,7 @@ pub fn ort_merge (theirs: &String) {
     let cwd = env::current_dir().unwrap();
     let ref_path = format!("{}/.xip/refs/heads/{}", cwd.display(), theirs);
     /* get current branch parent hash */
-    let ours = commit::get_parent_from_ref(); 
+    let our_commit_hash = commit::get_parent_from_ref(); 
     let mut base = String::new();
     let mut their_commit_hash = String::new(); 
     /* figure out whether 'theirs' is a valid branch name */
@@ -61,7 +83,7 @@ pub fn ort_merge (theirs: &String) {
         Ok(true) => {
             their_commit_hash = fs::read_to_string(&ref_path)
                 .unwrap().trim().to_string();
-            base = match resolve_base(&ours, &their_commit_hash) {
+            base = match resolve_base(&our_commit_hash, &their_commit_hash) {
                 Some(base_hash) => base_hash,
                 None => {
                     println!("unrelated history, nothing to do");
@@ -83,7 +105,7 @@ pub fn ort_merge (theirs: &String) {
      *      branch's tree to identify additions, deletions, 
      *      renames, and modifications */
 
-    let our_tree = tree::get_root_hash(&ours);
+    let our_tree = tree::get_root_hash(&our_commit_hash);
     let their_tree = tree::get_root_hash(&their_commit_hash);
 
     /* TODO: reconcile file structure: 
@@ -96,7 +118,7 @@ pub fn ort_merge (theirs: &String) {
      *      apply three-way content merging where 
      *      possible and mark unresolved conflicts */
 
-    let merged = merge(&base, &ours, &their_commit_hash);
+    let merged = merge(&base, &our_commit_hash, &their_commit_hash);
     /* ... */
 
     /* TODO: produce the result:  

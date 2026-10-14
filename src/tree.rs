@@ -20,6 +20,11 @@ pub fn get_root_hash (commit_hash: &str) {
 
 }
 
+/* TODO: */
+pub fn read_tree (tree_hash: &str) {
+
+}
+
 /* parses the index, builds and returns a recursive HashMap */
 fn build_tree_hmap (index: &Index) -> TreeEntry {
     /* create the the root tree node */
