@@ -35,6 +35,11 @@ fn resolve_base (ours: &String, theirs: &String) -> Option<String> {
     None
 }
 
+/* the core logic of the ORT merge engine:
+* 1. tree skipping (O(1) early exit if nothing changed)
+* 2. memoization (O(1) cache lookups for previously merged directories)
+* 3. 3-Way Hash Resolution (Identifying additions, deletions, 
+*    and conflicts without touching file contents) */
 fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mut OrtCache) -> CachedTreeMerge {
     /* case 1 (tree skipping): absolutely nothing changed inside 
      * this folder on either branch */
@@ -102,6 +107,7 @@ fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mu
     }
     /* construct and return CachedTreeMerge */
     /* write the new tree object and get it's unique hash */
+    /* TODO helper: */
     let merged_tree_hash = tree::write_tree(&merged_files);
     let result = CachedTreeMerge { merged_tree_hash, has_conflict };
     /* save it to the cache */
