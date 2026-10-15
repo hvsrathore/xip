@@ -78,16 +78,9 @@ fn hash_tree (root_map: &HashMap<String, TreeEntry>) -> (String, String) {
      * so, traverse the hashmap (tree) and create a list of [names] 
      * all the files and directories and sort this list */
     let mut file_list: Vec<(&String, &TreeEntry)> = root_map.into_iter().collect();
-        file_list.sort_by(|a, b| a.0.cmp(&b.0));
+    file_list.sort_by(|a, b| a.0.cmp(&b.0));
     let mut tree_content = String::new();
     for (fname, tree_entry) in file_list {
-        /* Root (HashMap)
-        └── 📁 "linux" (TreeEntry::Tree)
-            └── 📁 "arch" (TreeEntry::Tree)
-                └── 📁 "alpha" (TreeEntry::Tree)
-                    └── 📁 "boot" (TreeEntry::Tree)
-                        └── 📁 "tools" (TreeEntry::Tree)
-                            └── 📄 "mkbb.c" (TreeEntry::Blob containing the file's hash) */
         match tree_entry {
             /* match got "linux", pauses and dives into the 
              * child directory - all the way down the chain to "mkbb.c" */

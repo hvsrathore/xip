@@ -2,7 +2,7 @@ use std::collections::{HashSet, HashMap};
 use std::env;
 use crate::commit;
 
-/* Key: (base_tree_hash, our_tree_hash, their_tree_hash) */
+/* key: (base_tree_hash, our_tree_hash, their_tree_hash) */
 pub type TreeCacheKey = (String, String, String);
 /* final merge of a specific directory */
 #[derive(Debug, Clone)]
@@ -36,7 +36,7 @@ fn resolve_base (ours: &String, theirs: &String) -> Option<String> {
 }
 
 fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mut OrtCache) -> CachedTreeMerge {
-    /* case 1: tree skipping; absolutely nothing changed inside 
+    /* case 1 (tree skipping): absolutely nothing changed inside 
      * this folder on either branch */
     if (base_tree == our_tree) && (base_tree == their_tree) {
        return CachedTreeMerge {
@@ -44,27 +44,69 @@ fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mu
            has_conflict: false
        };
     } 
-    /* case 2: one of the branches modified this directory,
+    /* case 2 (memoization): one of the branches modified this directory,
      * but what if the merge is already performed? */
-    if let Some(cached) = cache.get(&(base_tree.clone(), our_tree.clone(), their_tree.clone())) {
+    let cache_key = (base_tree.clone(), our_tree.clone(), their_tree.clone());
+    if let Some(cached) = cache.get(&cache_key) {
         return cached.clone(); 
     }
 
-    /* case 3: a brand new directory state, and we 
-     * actually have to compute the merge! */
+    /* case 3 (3-way hash resolution): identifying additions, deletions, 
+     * and conflicts without touching file contents */
 
+    /* a brand new directory state, and we 
+     * actually have to compute the merge! */
     let mut base_file_map: HashMap<String, String> = HashMap::new();
     let mut our_file_map: HashMap<String, String> = HashMap::new();
     let mut their_file_map: HashMap<String, String> = HashMap::new();
+    /* TODO helper: */
     tree::read_tree(&base_tree, &mut base_file_map);
     tree::read_tree(&our_tree, &mut our_file_map);
     tree::read_tree(&their_tree, &mut their_file_map);
+    /* master list of every unique file path across 
+     * all three branches, ensuring we don't miss files 
+     * that were newly added in just one branch. */
     let mut file_set: HashSet<String> = HashSet::new();
-
-    /* evaluate what happened to each file one by one, to do this: 
-     * loop through our file_set: for each filename in that loop, 
-     * figure out if it was modified, 
+    /* extract keys from maps and combine them into a single data structure */
+    for file_map in [&base_file_map, &our_file_map, &their_file_map] {
+        file_set.extend(file_map.keys().cloned());
+    }
+    /* evaluate what happened to each file one by one, 
+     * to do this: loop through our file_set: for each 
+     * filename in that loop, figure out if it was modified, 
      * added, deleted, or left alone by each branch. */
+    let mut has_conflict = false;
+    let mut merged_files: HashMap<String, String> = HashMap::new();
+    /* transformation for the 3-way hash comparison 
+     * loop, it evaluates all possibilities simultaneously 
+     * and identifies conflicts: */
+    for file in file_set {
+        let base_hash = base_file_map.get(&file);
+        let our_hash = our_file_map.get(&file);
+        let their_hash = their_file_map.get(&file);
+
+        let resolved_hash = if our_hash == their_hash {
+            our_hash 
+        } else if base_hash == our_hash {
+            their_hash 
+        } else if base_hash == their_hash {
+            our_hash 
+        } else {
+            has_conflict = true;
+            None 
+        };
+
+        if let Some(hash) = resolved_hash {
+            merged_files.insert(file, hash.clone());
+        }
+    }
+    /* construct and return CachedTreeMerge */
+    /* write the new tree object and get it's unique hash */
+    let merged_tree_hash = tree::write_tree(&merged_files);
+    let result = CachedTreeMerge { merged_tree_hash, has_conflict };
+    /* save it to the cache */
+    cache.insert(cache_key, result.clone());
+    result
 }
 
 pub fn ort_merge (theirs: &String) {
