@@ -13,6 +13,16 @@ pub struct CachedTreeMerge {
 /*  the ORT cache itself */
 pub type OrtCache = HashMap<TreeCacheKey, CachedTreeMerge>;
 
+/* get_diff() returns a list of Hunks */
+struct Hunk {
+    /* the first line affected in the base file */
+    base_start: usize,
+    /* the last line affected in the base file */
+    base_end: usize,
+    /* the new text replacing those lines */
+    new_text: String
+}
+
 /*  find the common ancestor by walking 'ours' parent hashes 
  *  into a HashSet for O(1) lookups, then walking 'theirs' 
  *  parents until we find a match */
@@ -35,10 +45,36 @@ fn resolve_base (ours: &String, theirs: &String) -> Option<String> {
     None
 }
 
+fn merge_file_content (base_hash: Option<&String>, our_hash: Option<&String>, their_hash: Option<&String>) -> Option<String> {
+    let mut base_text = String::new();
+    let mut our_text = String::new();
+    let mut their_text = String::new();
+    /* TODO: helper */
+    if let Some(hash) = base_hash { base_text = object::read_blob(hash); } 
+    if let Some(hash) = our_hash { our_text = object::read_blob(hash); }    
+    if let Some(hash) = their_hash { their_text = object::read_blob(hash); }
+    /* TODO: helper */
+    let our_changed_hunks = get_diff(&base_text, &our_text);
+    let their_changed_hunks = get_diff(&base_text, &their_text);
+
+    for our_hunk in &our_changed_hunks {
+        for their_hunk in &their_changed_hunks {
+            if (our_hunk.base_start < their_hunk.base_end) && (their_hunk.base_start < our_hunk.base_end) {
+                return None;
+            }         
+        }
+    }
+    /* TODO: helper */
+    let merged_text = apply_patches(&base_text, our_changed_hunks, their_changed_hunks);
+    /* TODO: helper */
+    let new_hash = object::write_blob(&merged_text);
+    Some(new_hash)
+}
+
 /* the core logic of the ORT merge engine:
 * 1. tree skipping (O(1) early exit if nothing changed)
 * 2. memoization (O(1) cache lookups for previously merged directories)
-* 3. 3-Way Hash Resolution (Identifying additions, deletions, 
+* 3. 3-Way Hash Resolution (identifying additions, deletions, 
 *    and conflicts without touching file contents) */
 fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mut OrtCache) -> CachedTreeMerge {
     /* case 1 (tree skipping): absolutely nothing changed inside 
@@ -55,7 +91,6 @@ fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mu
     if let Some(cached) = cache.get(&cache_key) {
         return cached.clone(); 
     }
-
     /* case 3 (3-way hash resolution): identifying additions, deletions, 
      * and conflicts without touching file contents */
 
@@ -97,8 +132,12 @@ fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mu
         } else if base_hash == their_hash {
             our_hash 
         } else {
-            has_conflict = true;
-            None 
+            if let Some(merged_hash) = merge_file_content(&base_hash, &our_hash, &their_hash) {
+                merged_hash
+            } else {
+                has_conflict = true;
+                None
+            }
         };
 
         if let Some(hash) = resolved_hash {
@@ -152,7 +191,7 @@ pub fn ort_merge (theirs: &String) {
      *      compare the base tree with each 
      *      branch's tree to identify additions, deletions, 
      *      renames, and modifications */
-
+    /* TODO: helper */
     let our_tree = tree::get_root_hash(&our_commit_hash);
     let their_tree = tree::get_root_hash(&their_commit_hash);
 
@@ -160,7 +199,6 @@ pub fn ort_merge (theirs: &String) {
      *      handle renames, directory changes, 
      *      file/directory conflicts, and 
      *      competing changes to paths */
-
 
     /* TODO: merge file contents:
      *      apply three-way content merging where 

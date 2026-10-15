@@ -21,7 +21,12 @@ pub fn get_root_hash (commit_hash: &str) {
 }
 
 /* TODO: */
-pub fn read_tree (tree_hash: &str) {
+pub fn read_tree (tree_hash: &str, file_map: &mut HashMap<String, String>) {
+
+}
+
+/* TODO: */
+pub fn write_tree (merged_files: &HashMap<String, String>) {
 
 }
 
