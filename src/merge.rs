@@ -23,6 +23,16 @@ struct Hunk {
     new_text: String
 }
 
+/*TODO: */
+fn get_diff (base_text: &String, branch_text: &String) -> Vec<Hunk> {
+    
+}
+
+/*TODO: */
+fn apply_patches (base_text: &String, our_changed_hunks: Vec<Hunk>, their_changed_hunks: Vec<Hunk>) -> String {
+    
+}
+
 /*  find the common ancestor by walking 'ours' parent hashes 
  *  into a HashSet for O(1) lookups, then walking 'theirs' 
  *  parents until we find a match */
@@ -197,7 +207,6 @@ pub fn ort_merge (theirs: &String) {
     let their_tree = tree::get_root_hash(&their_commit_hash);
     let ort_cache = HashMap::new();
     let merged = merge(&base, &our_commit_hash, &their_commit_hash, &mut ort_cache);
-
     /* produce the result:  
      *      write the merged tree, update the index, 
      *      and let Git complete or pause the merge 
@@ -212,12 +221,10 @@ pub fn ort_merge (theirs: &String) {
         &their_commit_hash,        // Parent 2 (Theirs)
         &commit_message
     );
-
     /* Update the current branch pointer to the new merge commit
     (Assuming a helper to update HEAD/refs) */
     /* TODO: helper */
     commit::update_ref("HEAD", &new_commit_hash);
-
     /* finally, physically update the files on the hard drive */
     checkout::checkout(&merged.merged_tree_hash);
 }
