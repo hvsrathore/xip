@@ -44,7 +44,8 @@ fn resolve_base (ours: &String, theirs: &String) -> Option<String> {
     /* a fallback in case the loop finishes without a match */
     None
 }
-
+/* merge file contents: apply three-way content merging where 
+ * possible and mark unresolved conflicts */
 fn merge_file_content (base_hash: Option<&String>, our_hash: Option<&String>, their_hash: Option<&String>) -> Option<String> {
     let mut base_text = String::new();
     let mut our_text = String::new();
@@ -119,7 +120,10 @@ fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mu
     let mut merged_files: HashMap<String, String> = HashMap::new();
     /* transformation for the 3-way hash comparison 
      * loop, it evaluates all possibilities simultaneously 
-     * and identifies conflicts: */
+     * and identifies conflicts: 
+     *      handle renames, directory changes, 
+     *      file/directory conflicts, and 
+     *      competing changes to paths */
     for file in file_set {
         let base_hash = base_file_map.get(&file);
         let our_hash = our_file_map.get(&file);
@@ -154,8 +158,9 @@ fn merge (base_tree: &String, our_tree: &String, their_tree: &String, cache: &mu
     result
 }
 
+/* merge wrapper */
 pub fn ort_merge (theirs: &String) {
-    /* TODO: find the merge base: 
+    /* find the merge base: 
      *      determine the shared history 
      *      from which the two branches diverged */
     let cwd = env::current_dir().unwrap();
@@ -187,28 +192,31 @@ pub fn ort_merge (theirs: &String) {
         }
     }
 
-    /* TODO: analyze both sides: 
-     *      compare the base tree with each 
-     *      branch's tree to identify additions, deletions, 
-     *      renames, and modifications */
     /* TODO: helper */
     let our_tree = tree::get_root_hash(&our_commit_hash);
     let their_tree = tree::get_root_hash(&their_commit_hash);
-
-    /* TODO: reconcile file structure: 
-     *      handle renames, directory changes, 
-     *      file/directory conflicts, and 
-     *      competing changes to paths */
-
-    /* TODO: merge file contents:
-     *      apply three-way content merging where 
-     *      possible and mark unresolved conflicts */
-
-    let merged = merge(&base, &our_commit_hash, &their_commit_hash);
-    /* ... */
+    let ort_cache = HashMap::new();
+    let merged = merge(&base, &our_commit_hash, &their_commit_hash, &mut ort_cache);
 
     /* TODO: produce the result:  
      *      write the merged tree, update the index, 
      *      and let Git complete or pause the merge 
      *      depending on the result */
+
+    /* create the merge commit with TWO parents */
+    let commit_message = format!("merged branch '{}' into current", theirs);
+    let new_commit_hash = commit::write_merge_commit(
+        &merged.merged_tree_hash, 
+        &our_commit_hash,          // Parent 1 (Ours)
+        &their_commit_hash,        // Parent 2 (Theirs)
+        &commit_message
+    );
+
+    /* Update the current branch pointer to the new merge commit
+    (Assuming a helper to update HEAD/refs) */
+    commit::update_ref("HEAD", &new_commit_hash);
+
+    /* finally, physically update the files on the hard drive */
+    checkout::checkout(&merged.merged_tree_hash);
+}
 }

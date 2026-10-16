@@ -108,7 +108,7 @@ pub fn build_commit (index: &Index, message: &String) {
     let mut commit_content = String::new();
     if parent_hash.len() > 0 {
         /* TODO: replace hardcoded values */
-        /* TODO: what if a commit hash more than one parent, i.e., a merge commit */
+        /* TODO: what if a commit has more than one parent, i.e., a merge commit */
         commit_content = format!("tree {}\nparent {}\nauthor HVSR hvsr@gmail.com {} +0000\ncommitter HVSR hvsr@gmail.com {} +0000\n\n{}",
             root_hash, parent_hash, timestamp, timestamp, message);
     } else {
