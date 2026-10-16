@@ -198,13 +198,14 @@ pub fn ort_merge (theirs: &String) {
     let ort_cache = HashMap::new();
     let merged = merge(&base, &our_commit_hash, &their_commit_hash, &mut ort_cache);
 
-    /* TODO: produce the result:  
+    /* produce the result:  
      *      write the merged tree, update the index, 
      *      and let Git complete or pause the merge 
      *      depending on the result */
 
     /* create the merge commit with TWO parents */
     let commit_message = format!("merged branch '{}' into current", theirs);
+    /* TODO: helper */
     let new_commit_hash = commit::write_merge_commit(
         &merged.merged_tree_hash, 
         &our_commit_hash,          // Parent 1 (Ours)
@@ -214,9 +215,9 @@ pub fn ort_merge (theirs: &String) {
 
     /* Update the current branch pointer to the new merge commit
     (Assuming a helper to update HEAD/refs) */
+    /* TODO: helper */
     commit::update_ref("HEAD", &new_commit_hash);
 
     /* finally, physically update the files on the hard drive */
     checkout::checkout(&merged.merged_tree_hash);
-}
 }
